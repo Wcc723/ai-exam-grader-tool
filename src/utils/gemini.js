@@ -48,17 +48,37 @@ export const gradeExam = async (apiKey, answerText, examImages) => {
       正確解答：
       ${answerText}
       
-      請提供以下格式的回覆：
-      1. 總分 (滿分 100 分，請根據題目數量自行配分)
-      2. 詳細的批改結果，包含每一題的對錯。
-      3. 針對錯誤題目的更正與解釋。
-      4. 給予學生的整體評語。
+      請提供以下 JSON 格式的回覆 (不要包含 Markdown code block 標記，直接輸出 JSON 字串)：
+      {
+        "studentName": "學生姓名 (若無法辨識請留空)",
+        "score": 總分 (數字，滿分 100),
+        "feedback": "給予學生的整體評語 (純文字)",
+        "detailedResult": "詳細的批改結果，包含每一題的對錯與更正 (Markdown 格式)"
+      }
 
-      請以 Markdown 格式輸出。
+      評分標準：
+      1. 請根據題目數量自行配分，總分 100 分。
+      2. 詳細結果請使用 Markdown 格式，清楚列出錯題與正確答案。
     `;
 
         const result = await model.generateContent([prompt, ...examParts]);
-        return result.response.text();
+        const text = result.response.text();
+
+        // Attempt to parse JSON
+        try {
+            // Remove markdown code blocks if present
+            const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(cleanText);
+        } catch (e) {
+            console.error("Failed to parse JSON:", e);
+            // Fallback to returning raw text in a structure
+            return {
+                studentName: "",
+                score: 0,
+                feedback: "解析失敗，請查看詳細結果",
+                detailedResult: text
+            };
+        }
     } catch (error) {
         console.error("Error grading exam:", error);
         throw error;

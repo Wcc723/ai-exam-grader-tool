@@ -1,8 +1,14 @@
 <script setup>
 import { ref } from 'vue';
-import { FileUp, FileText, X } from 'lucide-vue-next';
+import { FileUp, FileText, X, Loader2 } from 'lucide-vue-next';
 
 const emit = defineEmits(['file-selected', 'extract-text']);
+const props = defineProps({
+  isExtracting: {
+    type: Boolean,
+    default: false
+  }
+});
 const selectedFile = ref(null);
 
 const handleFileChange = (event) => {
@@ -48,9 +54,11 @@ const removeFile = () => {
       <div class="flex items-center gap-2">
         <button 
           @click="$emit('extract-text')"
-          class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors"
+          :disabled="isExtracting"
+          class="flex items-center gap-2 px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          解析解答
+          <Loader2 v-if="isExtracting" class="w-4 h-4 animate-spin" />
+          {{ isExtracting ? '解析中...' : '解析解答' }}
         </button>
         <button 
           @click="removeFile"
