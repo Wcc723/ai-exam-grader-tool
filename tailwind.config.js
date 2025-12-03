@@ -8,5 +8,8 @@ export default {
     extend: {},
   },
   plugins: [],
+  server: {
+    port: 5175, // 在這裡指定你想要的 port
+  },
 }
 
